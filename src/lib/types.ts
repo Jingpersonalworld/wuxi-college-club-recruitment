@@ -1,0 +1,4 @@
+export type Project = { id: string; name: string; slug: string; summary: string; description: string; requirements: string; start_at: string; deadline_at: string; status: string };
+export type Submission = { id: string; project_id: string; tracking_no: string; name: string; student_id: string; college: string; class_name: string; phone: string; email: string; school: string; major: string; grade: string; introduction: string; motivation: string; portfolio_url: string | null; status: string; public_note: string; admin_note: string; submitted_at: string; created_at: string };
+export const statusLabels: Record<string, string> = { draft: "草稿", submitted: "已提交", screening: "材料审核中", reviewing: "评审中", passed: "已通过", pending: "待定", rejected: "未通过", closed: "已关闭" };
+export function statusTone(status: string): string { return status === "passed" ? "green" : status === "rejected" || status === "closed" ? "red" : status === "pending" ? "amber" : ""; }

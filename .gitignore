@@ -1,0 +1,9 @@
+node_modules/
+.npm-cache/
+.next/
+.env
+.env.local
+.env.*.local
+coverage/
+*.tsbuildinfo
+resume-submission-system-mvp.zip

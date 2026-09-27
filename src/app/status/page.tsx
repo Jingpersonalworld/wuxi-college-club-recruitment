@@ -1,0 +1,13 @@
+"use client";
+import { useState } from "react";
+import { PublicShell } from "@/components/PublicShell";
+import { jsonFetch } from "@/lib/client-fetch";
+import { statusLabels, statusTone } from "@/lib/types";
+
+type StatusResult = { submission: { trackingNo: string; status: string; publicNote: string; submittedAt: string; projectName: string; history: { to_status: string; public_note: string; created_at: string }[] } };
+export default function StatusPage() {
+  const [trackingNo, setTrackingNo] = useState(""); const [queryCode, setQueryCode] = useState("");
+  const [result, setResult] = useState<StatusResult["submission"] | null>(null); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
+  async function query(event: React.FormEvent) { event.preventDefault(); setLoading(true); setError(""); setResult(null); try { const data = await jsonFetch<StatusResult>("/api/submissions/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ trackingNo: trackingNo.trim().toUpperCase(), queryCode: queryCode.trim().toUpperCase() }) }); setResult(data.submission); } catch (e) { setError(e instanceof Error ? e.message : "查询失败"); } finally { setLoading(false); } }
+  return <PublicShell><main className="form-wrap"><div className="page-head"><span className="eyebrow">APPLICATION STATUS</span><h1>报名状态查询</h1><p className="muted">输入报名成功页显示的报名编号和查询密码。</p></div><form className="form-card" onSubmit={query}><div className="field"><label htmlFor="trackingNo">报名编号</label><input id="trackingNo" placeholder="TD-XXXXXXXXXX" value={trackingNo} onChange={(e) => setTrackingNo(e.target.value)} required /></div><div className="field"><label htmlFor="queryCode">查询密码</label><input id="queryCode" value={queryCode} onChange={(e) => setQueryCode(e.target.value)} required /></div>{error && <div role="alert" className="notice error-box">{error}</div>}<button className="button" disabled={loading}>{loading ? "查询中…" : "查询状态"}</button></form>{result && <div className="card" style={{ marginTop: 20 }}><div className="section-head"><div><p className="meta">{result.projectName} · {result.trackingNo}</p><h2>当前状态</h2></div><span className={`badge ${statusTone(result.status)}`}>{statusLabels[result.status]}</span></div>{result.publicNote && <p className="notice">{result.publicNote}</p>}<h3 style={{ marginTop: 25 }}>状态时间线</h3>{result.history.map((item, index) => <div key={index} style={{ borderLeft: "2px solid #a9d9bf", padding: "0 0 18px 16px" }}><strong>{statusLabels[item.to_status] || item.to_status}</strong><div className="meta">{new Date(item.created_at).toLocaleString("zh-CN")}</div>{item.public_note && <div>{item.public_note}</div>}</div>)}</div>}</main></PublicShell>;
+}
